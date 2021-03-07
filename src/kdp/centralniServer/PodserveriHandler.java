@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
 
+import kdp.Konekcija;
 import kdp.Poruka;
 import kdp.Poruka.Tip;
 import kdp.ProveraPoruka;
@@ -41,51 +42,22 @@ public class PodserveriHandler extends Thread {
 	}
 
 	private boolean proveri() {
-		Socket socket = null;
-		ObjectOutputStream out = null;
-		ObjectInputStream in = null;
-
-		try {
-			socket = new Socket(p.getIP(), p.getPort());
-			socket.setSoTimeout(Y * 500);
-
-			out = new ObjectOutputStream(socket.getOutputStream());
-			in = new ObjectInputStream(socket.getInputStream());
-
-			out.writeObject(new ProveraPoruka());
-
-			in.readObject();
-
+		try (Konekcija podserver = new Konekcija(p.getIP(), p.getPort(), 2500)) {
+			podserver.setTimeout(Y * 500);
+			podserver.posaljiPoruku((new ProveraPoruka()));
+			podserver.primiPoruku();
+			
 			return true;
-		} catch (SocketException e) {
-
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
-			try {
-				Thread.sleep(Y * 500);
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-		} finally {
-			try {
-				if (in != null)
-					in.close();
-				if (out != null)
-					out.close();
-				if (socket != null)
-					socket.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
-
+		
 		return false;
 	}
 
 	private synchronized void preraspodeliKorisnike() {
 		cs.ukloniPodserver(p);
 		cs.dodajLog("Proglasavam podserver " + p.getId() + " nedostupnim");
-		if (p.getKorisnici().size() > 0)
+		if (p.getKorisnici() != null && p.getKorisnici().size() > 0)
 			cs.preraspodeliKorisnike(p);
 	}
 }

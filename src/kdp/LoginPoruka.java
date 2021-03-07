@@ -2,21 +2,39 @@ package kdp;
 
 public class LoginPoruka implements Poruka {
 	private Tip tip;
-	private String username;
-	private String password;
+	private Korisnik korisnik;
+	private boolean klijent;
 
 	public LoginPoruka(String username, String password, Tip tip) {
-		this.username = username;
-		this.password = password;
+		this.korisnik = new Korisnik(username, password);
 		this.tip = tip;
+	}
+	
+	public LoginPoruka(Korisnik korisnik, Tip tip) {
+		this.korisnik = korisnik;
+		this.tip = tip;
+	}
+	
+	public LoginPoruka(String username, String password, Tip tip, boolean klijent) {
+		this.korisnik = new Korisnik(username, password);
+		this.tip = tip;
+		this.klijent = klijent;
 	}
 
 	public String getUsername() {
-		return username;
+		return korisnik.getUsername();
 	}
 	
 	public String getPassword() {
-		return password;
+		return korisnik.getPassword();
+	}
+	
+	public Korisnik getKorisnik() {
+		return korisnik;
+	}
+	
+	public boolean isKlijent() {
+		return klijent;
 	}
 	
 	@Override

@@ -1,60 +1,66 @@
 package kdp.centralniServer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
+import kdp.Korisnik;
 
 public class Podserver {
-	private static int ID = 0;
-	
+	private static volatile int ID = 0;
+
 	private int id = ++ID;
 	private String IP;
 	private int port;
-	private HashMap<String, String> korisnici = new HashMap<String, String>();
+	private HashMap<String, Korisnik> korisnici = new HashMap<>();
 
 	public Podserver(String IP, int port) {
 		this.IP = IP;
 		this.port = port;
 	}
-	
+
 	public String getIP() {
 		return IP;
 	}
-	
+
 	public int getPort() {
 		return port;
 	}
-	
+
 	public int getId() {
 		return id;
 	}
-	
+
 	public synchronized boolean dodajKorisnika(String username, String password) {
-		if (getKorisnici().containsKey(username)) return false;
-		getKorisnici().put(username, password);
+		if (korisnici.containsKey(username))
+			return false;
+		korisnici.put(username, new Korisnik(username, password));
 		return true;
 	}
-	
+
 	public synchronized boolean postojiKorisnik(String username) {
-		return getKorisnici().containsKey(username);
+		return korisnici.containsKey(username);
 	}
-	
+
 	public synchronized boolean proveriKorisnika(String username, String password) {
-		return getKorisnici().containsKey(username) && getKorisnici().get(username) == password;
+		return korisnici.containsKey(username) && korisnici.get(username).getPassword().equals(password);
 	}
-	
+
 	public int getSize() {
-		return getKorisnici().size();
+		return korisnici.size();
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
-		return (o instanceof Podserver) && IP.equals(((Podserver)o).getIP()) && port == ((Podserver)o).getPort();
+		return (o instanceof Podserver) && IP.equals(((Podserver) o).getIP()) && port == ((Podserver) o).getPort();
 	}
 
-	public HashMap<String, String> getKorisnici() {
-		return korisnici;
-	}
-
-	public void setKorisnici(HashMap<String, String> korisnici) {
-		this.korisnici = korisnici;
+	public List<Korisnik> getKorisnici() {
+		if (korisnici.size() == 0)
+			return null;
+		List<Korisnik> svi = new ArrayList<>();
+		for (String username : korisnici.keySet())
+			svi.add(korisnici.get(username));
+		return svi;
 	}
 }
